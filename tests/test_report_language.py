@@ -226,13 +226,40 @@ def test_superlative_falls_back_when_every_cell_is_on_a_boundary():
     assert "5.0pp on A/anthropic" in body
 
 
+def test_no_superlative_phrase_asserts_quality_of_a_daggered_cell():
+    """A cell can clear both bounds and still carry the one-sided dagger. The
+    generated text must name the criterion it used, not call such a cell "the
+    best-measured" -- that is the same error as picking a degenerate cell."""
+    records = [
+        # Clears the bounds, so eligible for the smallest-MDE slot -- but its MDE
+        # exceeds its headroom upward, so it is flagged one-sided.
+        _record("OneSided", "perplexity", rate=0.89, mde=0.21, deff=2.8,
+                ci95_cluster=(0.78, 0.99), ci_at_boundary="none",
+                mde_interpretable="down_only", headroom_up=0.11),
+        _record("TwoSided", "anthropic", rate=0.38, mde=0.33, deff=2.9,
+                ci95_cluster=(0.22, 0.54), mde_interpretable="both", headroom_up=0.62),
+    ]
+    text = render_findings(records, "test category", "B1")
+    body = text.split("## Per-cell numbers", 1)[0]
+    daggered = {r.brand for r in records if r.mde_interpretable != "both"}
+    for phrase in ("best-measured", "best measured", "most precise", "cleanest"):
+        for line in body.splitlines():
+            if phrase in line.lower():
+                assert not any(b in line for b in daggered), (
+                    f"{phrase!r} attached to a one-sided cell: {line!r}"
+                )
+    # It must state the criterion, and report the stricter two-sided rung too.
+    assert "clears both bounds" in body
+    assert "33.0pp on TwoSided/anthropic" in body
+
+
 def test_findings_explains_why_superlatives_exclude_boundary_cells():
     records = [
         _record("Degenerate", "anthropic", rate=0.96, mde=0.05, deff=1.9, ci_at_boundary="upper"),
         _record("Clean", "anthropic", rate=0.50, mde=0.21, deff=2.8),
     ]
     text = render_findings(records, "test category", "B1")
-    assert "degenerate at a bound" in text
+    assert "bootstrap is degenerate there" in text
     assert "most degenerate one" in text
 
 

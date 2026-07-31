@@ -18,7 +18,7 @@ Batch `2026-07-28T10-43-37Z`, run 2026-07-28.
 | design effect | **2.89** average, range 1.90–3.49 |
 | interval width vs pooled | **1.70×** wider (√2.89) |
 | effective sample size | ~35 of every 100 runs |
-| MDE, cleanly measured cells | **21.3pp to 35.4pp** (α=0.05, power=0.80) |
+| MDE, cells clearing both bounds | **21.3pp to 35.4pp** (α=0.05, power=0.80) |
 | between-prompt variance share | 49% average, 30–65% across cells |
 | runs excluded | 2 of 200 (1.0%) |
 
@@ -26,12 +26,28 @@ The per-cell table is in the generated
 [`findings.md`](../reports/2026-07-28T10-43-37Z/findings.md) rather than retyped
 here, so it cannot drift from the aggregate.
 
-The MDE range deliberately excludes cells whose interval terminates on 0 or 1.
-The smallest MDE in the full table is 12.4pp on Asana/anthropic, but that cell
-sits at 0.957 with its interval touching 1.00: the percentile bootstrap is
-degenerate there, which compresses the interval and understates the threshold. It
-is the most degenerate cell in the table, not the best measured. Among cells
-measured cleanly the floor is 21.3pp.
+### Which floor, and why
+
+"The smallest MDE" depends on which cells you allow to compete, and the answer
+moves by a factor of two and a half across three defensible criteria. Rather than
+defend one number, here is the whole ladder — the same instinct as printing the
+naive interval next to the correct one.
+
+| criterion | floor | cell | why it is disqualified |
+|---|---|---|---|
+| smallest in the table | 12.4pp | Asana/anthropic | interval touches 1.00; the percentile bootstrap is degenerate there and the compression understates the threshold. Not usable. |
+| smallest among cells clearing both bounds | **21.3pp** | Asana/perplexity | usable, but still one-sided: at a rate of 0.890 there is only 0.110 of headroom upward, so a 21.3pp *increase* is not a thing this cell can describe. Carries `†`. |
+| smallest with an MDE below the headroom on both sides | 32.6pp | Basecamp/anthropic | none — this is the strictest reading. Only the two Basecamp cells qualify. |
+
+**The README quotes 21.3pp**, the middle rung: it is the tightest figure that is
+not an artifact of a bound, and it is the one the generated `findings.md`
+reports. If you want a threshold that reads in both directions — the natural one
+for week-over-week tracking, where a brand can move either way — the honest
+number is **32.6pp**, and only two of the eight cells support it at all.
+
+That the strictest rung is available only for the two lowest-rate cells is itself
+the finding: near the ceiling there is not enough room left for a symmetric
+absolute-scale threshold to mean anything.
 
 ## What the design-effect check showed
 
@@ -77,13 +93,26 @@ edit distance, and no partial-overlap threshold, and the retry count is unchange
 A span containing a word absent from the source still fails. Exclusions fell from
 14.5% to 1.0% — 2 runs, one per provider.
 
-**Recovering 28 Perplexity runs moved every cell's mention rate by at most 0.009,
-in mixed directions** (four up, one down, three unchanged). That argues against
-the exclusions having been selective: had the dropped runs differed systematically
-in whether they mentioned brands, adding them back would have shifted the rates in
-a consistent direction. It does **not** establish that the extractor is correct.
-A false-negative rate shared by both the excluded and retained halves would move
-nothing and would remain invisible here.
+Recovering the 28 Perplexity runs moved the four Perplexity mention rates as
+follows — and only these four are evidence, since the Anthropic cells never had a
+run recovered and any movement in them comes from their own single exclusion:
+
+| cell | pre | post | delta |
+|---|---|---|---|
+| Asana/perplexity | 0.899 | 0.890 | −0.009 |
+| Basecamp/perplexity | 0.522 | 0.528 | +0.005 |
+| Trello/perplexity | 0.938 | 0.940 | +0.002 |
+| ClickUp/perplexity | 0.830 | 0.830 | 0.000 |
+
+**At most 0.009, in mixed directions** — two up, one down, one unchanged. That
+argues against the exclusions having been selective: had the dropped runs
+differed systematically in whether they mentioned brands, adding 28 of them back
+would have shifted the rates consistently in one direction rather than jittering
+around zero.
+
+It does **not** establish that the extractor is correct. A false-negative rate
+shared by both the excluded and the retained halves would move nothing here and
+would stay invisible.
 
 ## Extractor validation
 
@@ -136,9 +165,22 @@ bound.
 
 **Three intervals terminate at exactly 1.00**, where the percentile bootstrap is
 degenerate: the interval end is an artifact of the bound, not an estimate. The
-largest design-effect residual in the batch (−0.60, Asana/anthropic) is exactly
-such a cell, and the compression is the likely cause. Logit-scale intervals or a
-BCa bootstrap would be the principled fix; neither is implemented.
+largest design-effect residual in the batch (−0.60, Asana/anthropic) is such a
+cell, and it is over-determined: two mechanisms push it down, not one. The
+degenerate cluster interval compresses the numerator, and in the denominator the
+Wilson interval runs wider than the asymptotic one near the bound — for that cell
+by enough to scale the design effect by 0.863 on its own. Neither mechanism has
+to be doing all the work, and this batch cannot apportion them. Logit-scale
+intervals or a BCa bootstrap would be the principled fix; neither is implemented.
+
+**The design effect is itself an estimate.** It is computed from 20 prompts and
+carries its own sampling error. The worked example in the design note — ten
+prompts with no true between-prompt variance returning 1.49 rather than 1.00 —
+shows the scale of that noise. No interval is reported on the design effect, and
+the per-cell figures should not be read to two decimal places. The agreement with
+the `1 + (k − 1)·ICC` prediction, a mean absolute residual of 0.24 across eight
+cells, is evidence that the estimates are not badly off; it is not a substitute
+for an interval. Bootstrapping the design effect is the obvious next step.
 
 **One category, two providers, one date.** Nothing here transfers to another
 category, and the figures are specific to the model versions recorded in

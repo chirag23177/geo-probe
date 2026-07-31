@@ -225,6 +225,10 @@ def render_findings(records: Sequence[AggRecord], category: str, batch_id: str) 
     coarsest = _pick(cells, lambda c: c.rec.mde_abs_pp, largest=True)
     finest = _pick(cells, lambda c: c.rec.mde_abs_pp, largest=False)
     most_inflated = _pick(cells, lambda c: c.rec.mde_inflation, largest=True)
+    # The strictest rung: cells whose MDE is smaller than the headroom on both
+    # sides, so the threshold is interpretable as an increase or a decrease.
+    two_sided = [c for c in cells if c.rec.mde_interpretable == "both"]
+    finest_two_sided = min(two_sided, key=lambda c: c.rec.mde_abs_pp) if two_sided else None
     mean_deff = sum(r.design_effect for r in records) / len(records)
     shares = [r.var_between_prompt_share for r in records if r.var_between_prompt_share is not None]
     mean_between = sum(shares) / len(shares) if shares else None
@@ -270,14 +274,23 @@ def render_findings(records: Sequence[AggRecord], category: str, batch_id: str) 
                 f"on average), so prompts and reps are close to interchangeable and the naive "
                 f"interval is nearly correct -- the opposite of the usual case."
             )
+    # Name the criterion rather than assert quality: "best-measured" is a claim,
+    # "smallest among cells whose interval clears the bounds" is a fact, and the
+    # cell supplying it may still carry the one-sided dagger.
     para.append(
         f"The headline number is the minimum detectable effect: at this sample size, "
         f"alpha={records[0].mde_alpha}, power={records[0].mde_power}, a week-over-week change has "
-        f"to exceed {finest.mde_phrase} in the best-measured cell and {coarsest.mde_phrase} in the "
-        f"worst before this design can distinguish it from sampling noise. Both are chosen among "
-        f"cells whose interval does not touch 0 or 1, since the bootstrap is degenerate at a bound "
-        f"and understates the MDE there."
+        f"to exceed {finest.mde_phrase}, the smallest among cells whose interval clears both "
+        f"bounds, and {coarsest.mde_phrase} at the other end, before this design can distinguish "
+        f"it from sampling noise. Cells on a bound are excluded from both, since the bootstrap is "
+        f"degenerate there and understates the MDE."
     )
+    if finest_two_sided is not None:
+        para.append(
+            f"Applying the stricter criterion -- an MDE smaller than the headroom on both sides, so "
+            f"the threshold reads as an increase or a decrease -- the floor is "
+            f"{finest_two_sided.mde_phrase}."
+        )
     para.append(
         f"A change smaller than that cannot be distinguished from sampling noise at this sample "
         f"size; the design has no power to detect a move that small, which is a statement about "

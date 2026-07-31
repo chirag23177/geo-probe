@@ -17,8 +17,9 @@ threshold: the smallest change the design can actually see.
 - **Design effect 2.89** (range 1.90–3.49). Treating each run as an independent
   trial understates the variance by that factor; the honest interval is √2.89 ≈
   **1.7× wider** than the conventional one.
-- **MDE 21.3pp to 35.4pp** at α=0.05, power=0.80, across the cells this design
-  measures cleanly.
+- **MDE 21.3pp to 35.4pp** at α=0.05, power=0.80, across the cells whose
+  intervals clear both bounds. Demanding a threshold that reads in both
+  directions raises the floor to 32.6pp — [full ladder](docs/RESULTS.md).
 - At 20 prompts × 5 repetitions, a brand's mention rate has to move by roughly a
   fifth to a third before the change is distinguishable from sampling noise.
 
@@ -110,7 +111,7 @@ src/geo_probe/
   report.py      stage 4 — chart and findings
   diagnose.py    extraction-failure analysis
   providers/     one ABC, two implementations
-tests/           130 tests, no network required
+tests/           139 tests, no network required
 data/            raw runs, extracts, aggregates — committed so results re-run
 reports/         generated chart, findings, and failure diagnoses
 docs/            design note and results
