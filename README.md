@@ -46,24 +46,28 @@ support. Why that matters → [docs/DESIGN.md](docs/DESIGN.md)
 
 ## Install
 
+Requires Python 3.12+.
+
 ```bash
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-Set both API keys in your environment. Nothing in this tool reads a `.env` file
-— export the variables in the shell you run from. PowerShell:
-
-```powershell
-$env:ANTHROPIC_API_KEY = "sk-ant-..."
-$env:PERPLEXITY_API_KEY = "pplx-..."
-```
-
-bash:
+Supply both API keys, either by copying `.env.example` to `.env` and filling it
+in:
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-export PERPLEXITY_API_KEY=pplx-...
+cp .env.example .env
 ```
+
+or by exporting them in the shell you run from — `$env:ANTHROPIC_API_KEY =
+"sk-ant-..."` in PowerShell, `export ANTHROPIC_API_KEY=sk-ant-...` in bash.
+
+The CLI reads `.env` from the directory you run it in and echoes which keys it
+picked up. An exported variable wins over the file, so a stale `.env` cannot
+silently override a key you just set. Loading `.env` is a convenience of the
+command line only: importing `geo_probe` as a library reads the process
+environment and nothing else.
 
 Verify the install with no keys and no network:
 
