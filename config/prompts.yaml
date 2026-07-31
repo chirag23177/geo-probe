@@ -1,0 +1,85 @@
+# 20 buyer-intent prompts. None of them names a brand -- naming brands would prime
+# the model and destroy the measurement. Intents:
+#   listicle   -- "give me options"
+#   comparison -- "weigh options against each other"
+#   validation -- "I have a constraint, what fits"
+prompts:
+  - id: p01
+    text: "What's the best project management software for a small team?"
+    intent: listicle
+
+  - id: p02
+    text: "Recommend project management tools for a 10-person startup."
+    intent: listicle
+
+  - id: p03
+    text: "What project management app should a 5-person agency use to track client work?"
+    intent: listicle
+
+  - id: p04
+    text: "List the top project management platforms for small businesses in 2026."
+    intent: listicle
+
+  - id: p05
+    text: "We're a small remote team with no dedicated project manager. What software should we use to stay organized?"
+    intent: listicle
+
+  - id: p06
+    text: "Which project management tools are easiest to set up for a team that has never used one?"
+    intent: listicle
+
+  - id: p07
+    text: "What are the most popular project management tools among small software teams?"
+    intent: listicle
+
+  - id: p08
+    text: "Compare the leading project management tools for small teams on price and ease of use."
+    intent: comparison
+
+  - id: p09
+    text: "For a small team, is a kanban-style tool or a task-list-style tool better? Which products should I look at for each?"
+    intent: comparison
+
+  - id: p10
+    text: "What are the tradeoffs between the main project management platforms for a team of about 15 people?"
+    intent: comparison
+
+  - id: p11
+    text: "Which project management software has the best free tier for a small team, and how do the free tiers compare?"
+    intent: comparison
+
+  - id: p12
+    text: "We're deciding between a lightweight tool and an all-in-one work platform for our 8-person team. What are our options and how do they differ?"
+    intent: comparison
+
+  - id: p13
+    text: "Rank the main project management tools for a small non-technical team by how much training they require."
+    intent: comparison
+
+  - id: p14
+    text: "Our team is outgrowing shared spreadsheets for project tracking. What should we move to?"
+    intent: validation
+
+  - id: p15
+    text: "We need project management software under $15 per user per month for a small team. What actually fits that budget?"
+    intent: validation
+
+  - id: p16
+    text: "Is there a project management tool that works well for a small team that hates complicated software?"
+    intent: validation
+
+  - id: p17
+    text: "We already use Slack and Google Workspace. What project management tool integrates well with those for a small team?"
+    intent: validation
+
+  - id: p18
+    text: "Our small team needs to track projects with external clients who won't create accounts. What software handles that?"
+    intent: validation
+
+  - id: p19
+    text: "We tried a project management tool and everyone stopped using it after two weeks. What should we try instead for a small team?"
+    intent: validation
+
+  - id: p20
+    text: "What's a good project management tool for a small team that mostly needs deadlines and file sharing, not sprint planning?"
+    intent: validation

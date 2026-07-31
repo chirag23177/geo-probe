@@ -1,0 +1,31 @@
+category: "project management software for small teams"
+
+# 4 brands total: 1 focus + 3 competitors. The config deliberately does NOT record
+# which one is the focus — nothing downstream needs to know, and the extractor
+# must not be able to infer it.
+brands:
+  - name: "Basecamp"
+    domains: ["basecamp.com"]
+  - name: "Asana"
+    domains: ["asana.com"]
+  - name: "Trello"
+    domains: ["trello.com", "atlassian.com"]
+  - name: "ClickUp"
+    domains: ["clickup.com"]
+
+providers:
+  - id: anthropic
+    model: claude-sonnet-5
+    temperature: 1.0
+  - id: perplexity
+    model: sonar-pro
+    # Perplexity provider default temperature; not set by us.
+
+# Stage 2 runs a separate deterministic grading pass. It is not one of the
+# providers above -- those are the measurement surfaces, this is the instrument.
+extractor:
+  model: claude-haiku-4-5
+  max_parse_retries: 3
+
+k: 5
+bootstrap_iters: 2000

@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.claude/
+
+# data/ is deliberately committed: the entire claim of this repo is that the
+# numbers are honest, and shipping the raw runs makes `aggregate` and `report`
+# re-runnable by anyone. Total size is under 2 MB.
