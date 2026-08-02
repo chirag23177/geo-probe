@@ -8,6 +8,7 @@ dist/
 .venv/
 venv/
 .claude/
+CLAUDE.md
 
 # data/ is deliberately committed: the entire claim of this repo is that the
 # numbers are honest, and shipping the raw runs makes `aggregate` and `report`
